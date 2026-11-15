@@ -1,0 +1,283 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hospital Climate Control</title>
+  <meta name="description" content="Simulated hospital climate and patient comfort control: live floor plan, alerts, patients, air network, zones and maintenance.">
+  <link rel="icon" href="favicon.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="css/app.css">
+  <script src="js/app.js" defer></script>
+</head>
+<body>
+  <a class="skip" href="#main">Skip to content</a>
+
+  <header class="masthead">
+    <div class="masthead-id">
+      <p class="site-name">Hospital Climate Control</p>
+      <p class="site-label" id="label">Demo hospital</p>
+    </div>
+    <div class="masthead-clock">
+      <p class="clock" id="clock" aria-live="off">--</p>
+      <p class="outside" id="outside">Outside --</p>
+    </div>
+    <div class="clock-controls" role="group" aria-label="Simulation clock">
+      <button type="button" id="run" class="btn btn-light">Start clock</button>
+      <label class="speed">Speed
+        <select id="speed"></select>
+      </label>
+      <button type="button" class="btn btn-ghost-light" data-tick="10">+10 min</button>
+      <button type="button" class="btn btn-ghost-light" data-tick="60">+1 hour</button>
+    </div>
+  </header>
+
+  <nav class="tabs" aria-label="Sections">
+    <a href="#building" data-tab="building">Building</a>
+    <a href="#patients" data-tab="patients">Patients</a>
+    <a href="#network" data-tab="network">Air network</a>
+    <a href="#zones" data-tab="zones">Zones</a>
+    <a href="#maintenance" data-tab="maintenance">Maintenance</a>
+    <a href="#log" data-tab="log">Log</a>
+    <a href="#scenarios" data-tab="scenarios">Scenarios</a>
+    <a href="#benchmarks" data-tab="benchmarks">Benchmarks</a>
+  </nav>
+
+  <p class="toast" id="toast" role="status" aria-live="polite"></p>
+
+  <div class="boot" id="boot" role="status" hidden>
+    <p>Starting the simulation in your browser. The first visit downloads the Python runtime (about 10 MB); after that it loads from the browser's cache.</p>
+  </div>
+
+  <main id="main">
+    <!-- Building --------------------------------------------------------->
+    <section id="tab-building" class="tab" aria-labelledby="h-building">
+      <div class="building-layout">
+        <div class="plan-col">
+          <div class="section-head">
+            <h1 id="h-building">Building</h1>
+            <div class="seg" role="radiogroup" aria-label="Colour rooms by">
+              <button type="button" role="radio" data-metric="temp" aria-checked="true">Temperature</button>
+              <button type="button" role="radio" data-metric="humidity" aria-checked="false">Humidity</button>
+              <button type="button" role="radio" data-metric="co2" aria-checked="false">CO₂</button>
+              <button type="button" role="radio" data-metric="type" aria-checked="false">Room type</button>
+            </div>
+          </div>
+          <div class="plan" id="plan" aria-label="Floor plan, top floor first"></div>
+          <div class="legend" id="legend"></div>
+
+          <div class="tools">
+            <form class="tool" id="range-form">
+              <h2>Rooms in a range</h2>
+              <p class="hint">Average, lowest and highest over consecutive room numbers.</p>
+              <div class="row">
+                <label>From <input name="first" inputmode="numeric" value="301" required></label>
+                <label>To <input name="last" inputmode="numeric" value="320" required></label>
+                <label>Reading
+                  <select name="metric">
+                    <option value="temperature">Temperature</option>
+                    <option value="humidity">Humidity</option>
+                    <option value="co2">CO₂</option>
+                  </select>
+                </label>
+                <button class="btn" type="submit">Calculate</button>
+              </div>
+              <p class="result" id="range-result"></p>
+            </form>
+            <form class="tool" id="weather-form">
+              <h2>Outside air</h2>
+              <p class="hint">The rooms drift toward it; the air units push back.</p>
+              <div class="row">
+                <label>Temperature °C <input name="temp" type="number" step="0.5" min="-20" max="55" required></label>
+                <label>Humidity % <input name="humidity" type="number" step="1" min="0" max="100" required></label>
+                <button class="btn" type="submit">Set outside air</button>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <aside class="alerts-col" aria-labelledby="h-alerts">
+          <div class="section-head">
+            <h2 id="h-alerts">Alerts <span class="count" id="alert-count">0</span></h2>
+            <button type="button" class="btn" id="serve">Send team to top alert</button>
+          </div>
+          <p class="hint">Most urgent first. Urgency grows with the room type, how far the reading is off, and how long the alert has waited.</p>
+          <ol class="alert-list" id="alert-list"><li class="empty">Loading alerts…</li></ol>
+          <div class="stat-strip" id="stat-strip"></div>
+        </aside>
+      </div>
+    </section>
+
+    <!-- Patients --------------------------------------------------------->
+    <section id="tab-patients" class="tab" aria-labelledby="h-patients" hidden>
+      <h1 id="h-patients">Patients</h1>
+      <div class="two-col">
+        <div>
+          <form class="tool" id="search-form" role="search">
+            <h2>Find by name</h2>
+            <label>Name starts with <input name="q" autocomplete="off" placeholder="e.g. rah"></label>
+          </form>
+          <form class="tool" id="idrange-form">
+            <h2>Find by patient ID</h2>
+            <div class="row">
+              <label>From <input name="lo" inputmode="numeric" value="1000"></label>
+              <label>To <input name="hi" inputmode="numeric" value="1199"></label>
+              <button class="btn" type="submit">Show</button>
+            </div>
+          </form>
+          <div class="table-wrap">
+          <table class="table" id="patient-table">
+            <caption class="sr" id="patient-caption">Patients</caption>
+            <thead><tr><th scope="col">ID</th><th scope="col">Name</th><th scope="col">Room</th><th scope="col">Prefers</th><th scope="col"><span class="sr">Actions</span></th></tr></thead>
+            <tbody></tbody>
+          </table>
+          </div>
+        </div>
+        <form class="tool" id="admit-form">
+          <h2>Admit a patient</h2>
+          <p class="hint">The room's setpoint follows its patients' preferred temperature, kept inside the room's safe range.</p>
+          <label>Patient ID <input name="id" inputmode="numeric" required></label>
+          <label>Full name <input name="name" required maxlength="80"></label>
+          <label>Room <input name="room" inputmode="numeric" required></label>
+          <div class="row">
+            <label>Preferred °C <input name="temp" type="number" step="0.5" min="15" max="30" value="22.5" required></label>
+            <label>Humidity % <input name="humidity" type="number" min="20" max="70" value="45" required></label>
+          </div>
+          <div class="row">
+            <label>Lighting 1–5 <input name="lighting" type="number" min="1" max="5" value="3" required></label>
+            <label>Max noise dB <input name="noise" type="number" min="20" max="80" value="40" required></label>
+          </div>
+          <button class="btn" type="submit">Admit patient</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Air network ------------------------------------------------------>
+    <section id="tab-network" class="tab" aria-labelledby="h-network" hidden>
+      <h1 id="h-network">Air network</h1>
+      <p class="lede">Each floor's air unit feeds two corridors; risers link the floors. Select a unit or a duct to break or repair it, and watch the supply re-route.</p>
+      <div class="network-layout">
+        <div class="diagram" id="diagram" aria-label="Duct diagram"><p class="hint">Loading the duct network…</p></div>
+        <div>
+          <div class="tool">
+            <h2>Network parts</h2>
+            <ul class="plain" id="parts"><li class="hint">Loading…</li></ul>
+          </div>
+          <form class="tool" id="route-form">
+            <h2>Cheapest route</h2>
+            <div class="row">
+              <label>From unit <select name="from" id="route-from"></select></label>
+              <label>To room <input name="to" inputmode="numeric" value="211" required></label>
+              <button class="btn" type="submit">Find route</button>
+            </div>
+            <p class="result" id="route-result"></p>
+          </form>
+          <form class="tool" id="spread-form">
+            <h2>Contamination spread</h2>
+            <p class="hint">Rooms reachable from a room within a number of ducts.</p>
+            <div class="row">
+              <label>Room <input name="room" inputmode="numeric" value="401" required></label>
+              <label>Ducts <input name="hops" type="number" min="0" max="10" value="2" required></label>
+              <button class="btn" type="submit">Trace</button>
+            </div>
+            <p class="result" id="spread-result"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
+    <!-- Zones ------------------------------------------------------------>
+    <section id="tab-zones" class="tab" aria-labelledby="h-zones" hidden>
+      <h1 id="h-zones">Zones</h1>
+      <p class="lede">Rooms in one zone can be given a setpoint together, from the room panel.</p>
+      <div class="two-col">
+        <div>
+          <div class="tool">
+            <h2>Group every room of a type</h2>
+            <div class="row" id="zone-types"></div>
+          </div>
+          <form class="tool" id="merge-form">
+            <h2>Join two rooms' zones</h2>
+            <div class="row">
+              <label>Room <input name="a" inputmode="numeric" required></label>
+              <label>Room <input name="b" inputmode="numeric" required></label>
+              <button class="btn" type="submit">Join zones</button>
+            </div>
+          </form>
+          <button type="button" class="btn btn-quiet" id="zones-reset">Split every zone</button>
+        </div>
+        <div class="tool">
+          <h2 id="zone-heading">Zones</h2>
+          <ul class="plain zone-list" id="zone-list"></ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Maintenance ------------------------------------------------------>
+    <section id="tab-maintenance" class="tab" aria-labelledby="h-maint" hidden>
+      <h1 id="h-maint">Maintenance</h1>
+      <div class="two-col">
+        <div>
+          <p class="lede">Earliest deadline first; equal deadlines go to the higher priority.</p>
+          <ol class="task-list" id="task-list"></ol>
+        </div>
+        <form class="tool" id="task-form">
+          <h2>Add a task</h2>
+          <label>What needs doing <input name="title" required maxlength="120"></label>
+          <label>Room (optional) <input name="room" inputmode="numeric"></label>
+          <div class="row">
+            <label>Due in minutes <input name="in_minutes" type="number" min="1" value="60" required></label>
+            <label>Priority
+              <select name="priority">
+                <option value="5">5 – critical</option>
+                <option value="4">4</option>
+                <option value="3" selected>3</option>
+                <option value="2">2</option>
+                <option value="1">1 – low</option>
+              </select>
+            </label>
+          </div>
+          <button class="btn" type="submit">Add task</button>
+        </form>
+      </div>
+    </section>
+
+    <!-- Log -------------------------------------------------------------->
+    <section id="tab-log" class="tab" aria-labelledby="h-log" hidden>
+      <div class="section-head">
+        <h1 id="h-log">Log</h1>
+        <button type="button" class="btn" id="undo">Undo last change</button>
+      </div>
+      <p class="lede" id="undo-next">Nothing to undo.</p>
+      <ol class="log-list" id="log-list"></ol>
+    </section>
+
+    <!-- Scenarios -------------------------------------------------------->
+    <section id="tab-scenarios" class="tab" aria-labelledby="h-scen" hidden>
+      <h1 id="h-scen">Scenarios</h1>
+      <p class="lede">Each scenario runs a fresh hospital from 08:00 and leaves its final state on the dashboard, so you can look around afterwards.</p>
+      <div class="scenario-list" id="scenario-list"></div>
+      <button type="button" class="btn btn-quiet" id="reset">Start a fresh demo hospital</button>
+      <h2 class="report-title" id="report-title" hidden>Report</h2>
+      <pre class="report" id="report" hidden></pre>
+    </section>
+
+    <!-- Benchmarks ------------------------------------------------------->
+    <section id="tab-benchmarks" class="tab" aria-labelledby="h-bench" hidden>
+      <h1 id="h-bench">Benchmarks</h1>
+      <p class="lede">Each data structure against the simple approach, on the same work. Both scales are logarithmic; the lower line is faster.
+        Re-measure on your machine with <code>python -m hospital_climate bench</code>.</p>
+      <div class="bench-grid" id="bench-grid"></div>
+    </section>
+  </main>
+
+  <!-- Room panel -->
+  <div class="scrim" id="scrim" hidden></div>
+  <aside class="panel" id="panel" role="dialog" aria-modal="true" aria-labelledby="panel-title" hidden>
+    <div class="panel-head">
+      <h2 id="panel-title">Room</h2>
+      <button type="button" class="btn btn-quiet" id="panel-close">Close</button>
+    </div>
+    <div id="panel-body"><p class="hint">Loading the room…</p></div>
+  </aside>
+</body>
+</html>

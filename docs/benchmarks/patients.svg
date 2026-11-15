@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 400" font-family="Arial, Helvetica, sans-serif" font-size="12" role="img" aria-label="Patients with IDs in a range (200 queries)">
+<rect width="100%" height="100%" fill="#ffffff"/>
+<text x="72" y="26" font-size="15" font-weight="bold" fill="#2e2a4f">Patients with IDs in a range (200 queries)</text>
+<line x1="72.0" y1="48" x2="72.0" y2="336" stroke="#e4e1ef"/>
+<text x="72.0" y="354" text-anchor="middle" fill="#5e5a78">100</text>
+<line x1="253.3" y1="48" x2="253.3" y2="336" stroke="#e4e1ef"/>
+<text x="253.3" y="354" text-anchor="middle" fill="#5e5a78">1,000</text>
+<line x1="434.7" y1="48" x2="434.7" y2="336" stroke="#e4e1ef"/>
+<text x="434.7" y="354" text-anchor="middle" fill="#5e5a78">10,000</text>
+<line x1="616.0" y1="48" x2="616.0" y2="336" stroke="#e4e1ef"/>
+<text x="616.0" y="354" text-anchor="middle" fill="#5e5a78">100,000</text>
+<line x1="72" y1="336.0" x2="616" y2="336.0" stroke="#e4e1ef"/>
+<text x="64" y="340.0" text-anchor="end" fill="#5e5a78">0.1 ms</text>
+<line x1="72" y1="264.0" x2="616" y2="264.0" stroke="#e4e1ef"/>
+<text x="64" y="268.0" text-anchor="end" fill="#5e5a78">1 ms</text>
+<line x1="72" y1="192.0" x2="616" y2="192.0" stroke="#e4e1ef"/>
+<text x="64" y="196.0" text-anchor="end" fill="#5e5a78">10 ms</text>
+<line x1="72" y1="120.0" x2="616" y2="120.0" stroke="#e4e1ef"/>
+<text x="64" y="124.0" text-anchor="end" fill="#5e5a78">100 ms</text>
+<line x1="72" y1="48.0" x2="616" y2="48.0" stroke="#e4e1ef"/>
+<text x="64" y="52.0" text-anchor="end" fill="#5e5a78">1 s</text>
+<line x1="72" y1="336" x2="616" y2="336" stroke="#5e5a78"/>
+<line x1="72" y1="48" x2="72" y2="336" stroke="#5e5a78"/>
+<text x="344.0" y="378" text-anchor="middle" fill="#2e2a4f">patients (log scale)</text>
+<text transform="translate(18 192.0) rotate(-90)" text-anchor="middle" fill="#2e2a4f">time (log scale)</text>
+<polyline fill="none" stroke="#5b3fa8" stroke-width="2.5" points="72.0,294.5 253.3,281.8 434.7,282.1 616.0,272.5"/>
+<circle cx="72.0" cy="294.5" r="3.5" fill="#5b3fa8"/>
+<circle cx="253.3" cy="281.8" r="3.5" fill="#5b3fa8"/>
+<circle cx="434.7" cy="282.1" r="3.5" fill="#5b3fa8"/>
+<circle cx="616.0" cy="272.5" r="3.5" fill="#5b3fa8"/>
+<line x1="84" y1="56" x2="108" y2="56" stroke="#5b3fa8" stroke-width="2.5"/>
+<text x="114" y="60" fill="#2e2a4f">AVL range query</text>
+<polyline fill="none" stroke="#b8233e" stroke-width="2.5" stroke-dasharray="6 4" points="72.0,265.9 253.3,207.1 434.7,139.4 616.0,56.7"/>
+<circle cx="72.0" cy="265.9" r="3.5" fill="#b8233e"/>
+<circle cx="253.3" cy="207.1" r="3.5" fill="#b8233e"/>
+<circle cx="434.7" cy="139.4" r="3.5" fill="#b8233e"/>
+<circle cx="616.0" cy="56.7" r="3.5" fill="#b8233e"/>
+<line x1="304" y1="56" x2="328" y2="56" stroke="#b8233e" stroke-width="2.5" stroke-dasharray="6 4"/>
+<text x="334" y="60" fill="#2e2a4f">scan all + sort</text>
+</svg>
