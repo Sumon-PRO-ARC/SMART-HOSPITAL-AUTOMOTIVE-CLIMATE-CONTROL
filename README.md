@@ -1,6 +1,3 @@
-<<<<<<< HEAD
-# SMART-HOSPITAL-AUTOMOTIVE-CLIMATE-CONTROL
-=======
 # Smart Hospital Automated Climate & Patient Comfort Control System
 
 A web-based simulation of a hospital climate controller, built to show how the
@@ -9,7 +6,7 @@ readings, serving the most critical room first, finding rooms and patients
 instantly, spotting rapid temperature rises, and handling faults through the
 building's duct network.
 
-**Live site:** <https://sumon-pro-arc.github.io/SMART-HOSPITAL-CLIMATE-CONTROL/>
+**Live site:** <https://sumon-pro-arc.github.io/SMART-HOSPITAL-AUTOMOTIVE-CLIMATE-CONTROL/>
 (runs entirely in your browser; nothing to install).
 
 ![The Building tab during a simulated heatwave: rooms coloured by how far they are from their safe range, alerts listed most urgent first](docs/images/dashboard.png)
@@ -254,4 +251,3 @@ is © 2020 Braille Institute of America, under the SIL Open Font License 1.1
 ([`web/fonts/OFL.txt`](web/fonts/OFL.txt)). The live site loads Pyodide
 (Mozilla Public License 2.0) from the jsDelivr CDN at run time; it is not part
 of this repository.
->>>>>>> 4ce329b (initial commit)
